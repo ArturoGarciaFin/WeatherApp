@@ -112,11 +112,11 @@ app.post('/api/forecast', async (req, res) => {
         const sql = 'INSERT INTO weather_history (location, temperature, description, start_date, end_date) VALUES (?, ?, ?, ?, ?)';
         const values = [city, avgTemp, mainDesc, startDate, endDate];
 
-        db.query(sql, values, (err, res) => {
+        db.query(sql, values, (err, result) => {
             if (err) {
                 console.error('Error in database CREATE', err);
             } else {
-                console.log(`Forecast saved. ID: ${res.insertID} | Time: ${startDate} to ${endDate}`);
+                console.log(`Forecast saved. ID: ${result.insertID} | Time: ${startDate} to ${endDate}`);
             }
         });
 
@@ -131,8 +131,21 @@ app.post('/api/forecast', async (req, res) => {
         console.error('Error in forecast route', error.message);
         res.status(500).json({error: 'Error while searching for forecast. Verify city name'});
     }
-})
+});
+
+app.get('/api/history', (req, res) => {
+    const sql = 'SELECT * FROM weather_history ORDER BY id DESC';
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error('Error searching for history in database', err);
+            return res.status(500).json({error: 'Error loading search history'});
+        }
+
+        res.json(result);
+    })
+});
 
 app.listen(PORT, () => {
-    console.log('🚀 Servidor rodando na porta http://localhost:${PORT}');
+    console.log(`Server running in port http://localhost:${PORT}`);
 });
