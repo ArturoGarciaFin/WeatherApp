@@ -87,7 +87,7 @@ app.post('/api/forecast', async (req, res) => {
         }
 
         const apiKey = process.env.OPENWEATHER_API_KEY;
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=pt_br`
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=en`
         const response = await axios.get(url);
 
         const filteredForecast = response.data.list.filter(item => {
@@ -108,7 +108,7 @@ app.post('/api/forecast', async (req, res) => {
         }));
 
         const avgTemp = (resultData.reduce((sum, day) => sum + day.temp, 0) / resultData.length).toFixed(1);
-        const mainDesc = resultData.description;
+        const mainDesc = resultData[0].description;
         const sql = 'INSERT INTO weather_history (location, temperature, description, start_date, end_date) VALUES (?, ?, ?, ?, ?)';
         const values = [city, avgTemp, mainDesc, startDate, endDate];
 
@@ -116,7 +116,8 @@ app.post('/api/forecast', async (req, res) => {
             if (err) {
                 console.error('Error in database CREATE', err);
             } else {
-                console.log(`Forecast saved. ID: ${result.insertID} | Time: ${startDate} to ${endDate}`);
+                const insertedId = result.insertId || (result[0] && result[0].insertId) || 'DB Auto-Increment';
+                console.log(`Forecast saved. ID: ${insertedId} | Time: ${startDate} to ${endDate}`);
             }
         });
 
