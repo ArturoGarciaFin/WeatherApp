@@ -146,6 +146,33 @@ app.get('/api/history', (req, res) => {
     })
 });
 
+app.put('/api/history/:id', (req, res) => {
+    const {id} = req.params;
+    const {location} = req.body;
+    if (!location || location.trim().length < 2) {
+        return res.status(400).json({error: 'Please give a valid location number with at least 2 characters'});
+    }
+
+    const sql = 'UPDATE weather_history SET location = ? WHERE id = ?';
+
+    db.query(sql, [location, id], (err, result) => {
+        if (err) {
+            console.error('Error updating database', err);
+            return res.status(500).json({error: 'Error while updating registry'});
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: 'No registry found with this ID'});
+        }
+
+        res.json({
+            message: 'Registry updated sucessfully',
+            id: id,
+            newLocation: location
+        });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running in port http://localhost:${PORT}`);
 });
