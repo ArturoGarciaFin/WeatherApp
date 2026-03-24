@@ -173,6 +173,24 @@ app.put('/api/history/:id', (req, res) => {
     });
 });
 
+app.delete('/api/history/:id', (req, res) => {
+    const {id} = req.params;
+    const sql = 'DELETE FROM weather_history WHERE id = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting from database', err);
+            return res.status(500).json({error: 'Error deleting registry'});
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: 'No registry found with this ID'});
+        }
+
+        res.json({message: 'Registry deleted sucessfully', id: id});
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running in port http://localhost:${PORT}`);
 });
