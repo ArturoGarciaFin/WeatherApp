@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -7,6 +7,22 @@ function App() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [weatherData, setWeatherData] = useState('');
+  const [history, setHistory] = useState([]);
+
+  const fetchHistory = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/history');
+      setHistory(response.data);
+    } 
+    
+    catch (error) {
+      console.error('Error fetching history:', error);
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+}
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -19,18 +35,22 @@ function App() {
       });
 
       setWeatherData(response.data);
+      fetchHistory();
       console.log('Data received');
-    } catch {
+    }
+    
+    catch (error) {
       console.error('Error in search', error);
       alert('Error while searching for forecast. Verify dates and city');
     }
   };
 
+
   return (
     <div className="app-container">
       <h1>Weather Forecast</h1>
 
-      <form onSubmit={handleSearch} style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
+      <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
           placeholder="City (e.g., Curitiba)"
@@ -54,12 +74,44 @@ function App() {
       </form>
 
       {weatherData && (
-        <div className="results">
-          <h2>Forecast for {weatherData.city}</h2>
-          <p>Period: {weatherData.period}</p>
-          <p><em>(Press F12 / Inspect to see the full data in the Console)</em></p>
+        <div className="results-container">
+          <h2>Forecast for {weatherData.period}</h2>
+          <p className="period-text">Period: {weatherData.period}</p>
+
+          <div className="forecast-grid">
+            {weatherData.forecast.map((day, index) => (
+              <div key={index} className="weather-card">
+                <h3>{day.date}</h3>
+                <p className="temp">{Math.round(day.temp)}°C</p>
+                <p className="desc">{day.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      <div className="history-container">
+        <h2>Search History</h2>
+        {history.length === 0 ? (
+          <p>No history found yet</p>
+        ) : (
+          <ul className="history-list">
+            {history.map((item) => {
+              const start = item.start_date ? item.start_date.split('T')[0] : 'N/A';
+              const end = item.end_date ? item.end_date.split('T')[0] : 'N/A';
+
+              return (
+                <li key={item.id} className="history-item">
+                  <div className="history-info">
+                    <strong>{item.location}</strong> | {start} to {end} | {item.temperature}°C
+                    <span className="history-desc"> ({item.description})</span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
