@@ -45,6 +45,39 @@ function App() {
     }
   };
 
+  const handleDelete = async (id) => {
+    const isConfirmed = window.confirm('Are you sure you want to delete this record?');
+
+    if (isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:5000/api/history/${id}`);
+        fetchHistory();
+      }
+
+      catch (error) {
+        console.error('Error deleting record:', error);
+        alert('Failed to delete the record');
+      }
+    }
+  };
+
+  const handleEdit = async (id, currentLocation) => {
+    const newLocation = window.prompt('Enter the new location:', currentLocation);
+
+    if (newLocation && newLocation.trim().length >= 2 && newLocation !== currentLocation) {
+      try {
+        await axios.put(`http://localhost:5000/api/history/${id}`, {
+          location: newLocation
+        });
+        fetchHistory();
+      }
+
+      catch (error) {
+        console.error('Error updating record', error);
+        alert('Failed to update the record. Verify city name and ensure it is at least 2 characters long');
+      }
+    }
+  };
 
   return (
     <div className="app-container">
@@ -105,6 +138,15 @@ function App() {
                   <div className="history-info">
                     <strong>{item.location}</strong> | {start} to {end} | {item.temperature}°C
                     <span className="history-desc"> ({item.description})</span>
+                  </div>
+
+                  <div className="history-actions">
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </li>
               );

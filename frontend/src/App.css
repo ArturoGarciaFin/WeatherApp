@@ -158,3 +158,32 @@ button:hover {
   font-style: italic;
   margin-left: 5px;
 }
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: #212529;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.edit-btn:hover {
+  background-color: #e0a800;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
